@@ -1,26 +1,121 @@
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import SpendingChart from "@/components/SpendingChart";
 import CategoryChart from "@/components/CategoryChart";
 import InsightCard from "@/components/InsightCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { totalMonthlySpend, insightCards, InsightCard as InsightCardType } from "@/data/mockData";
-import { DollarSign, TrendingUp, Target, CreditCard } from "lucide-react";
+import { apiService, DashboardData } from "@/services/api";
+import {
+  DollarSign,
+  TrendingUp,
+  Target,
+  CreditCard,
+  Loader2,
+} from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const handleInsightClick = (insight: InsightCardType) => {
-    navigate('/insights', { state: { selectedInsight: insight } });
+  // Get customer ID from localStorage
+  const customerId = localStorage.getItem("customerId");
+
+  // Fetch dashboard data from API
+  const {
+    data: dashboardData,
+    isLoading,
+    error,
+  } = useQuery<DashboardData>({
+    queryKey: ["dashboard", customerId],
+    queryFn: () => apiService.getDashboardData(customerId!),
+    enabled: !!customerId,
+  });
+
+  const handleInsightClick = (insight: any) => {
+    navigate("/insights", { state: { selectedInsight: insight } });
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 0,
     }).format(amount);
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">
+            Loading your financial data...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
+            Error Loading Data
+          </h2>
+          <p className="text-muted-foreground mb-4">
+            {error instanceof Error
+              ? error.message
+              : "Failed to load financial data"}
+          </p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => {
+                localStorage.removeItem("customerId");
+                window.dispatchEvent(new CustomEvent("logout"));
+                navigate("/login");
+              }}
+              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90"
+            >
+              Clear Session & Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show no data state
+  if (!dashboardData) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
+            No Data Available
+          </h2>
+          <p className="text-muted-foreground">
+            Unable to load financial data for this customer.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate quick stats from real data
+  const totalMonthlySpend = dashboardData.spending_data.total_monthly_spend;
+  const accountCount = dashboardData.accounts.length;
+  const totalBalance = dashboardData.accounts.reduce(
+    (sum, account) => sum + account.balance,
+    0
+  );
 
   const quickStats = [
     {
@@ -28,32 +123,36 @@ const Dashboard = () => {
       value: formatCurrency(totalMonthlySpend),
       icon: DollarSign,
       description: "Current month total",
-      trend: "+8.2%"
+      trend: "+8.2%",
     },
     {
-      title: "Budget Remaining",
-      value: formatCurrency(600),
+      title: "Total Balance",
+      value: formatCurrency(totalBalance),
       icon: Target,
-      description: "Until monthly limit",
-      trend: "85% used"
+      description: "Across all accounts",
+      trend: `${accountCount} accounts`,
     },
     {
-      title: "Active Cards",
-      value: "3",
+      title: "Active Accounts",
+      value: accountCount.toString(),
       icon: CreditCard,
-      description: "Credit & Debit cards",
-      trend: "2 primary"
-    }
+      description: "Bank accounts",
+      trend: "All active",
+    },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Financial Dashboard</h1>
-          <p className="text-muted-foreground">Get insights into your spending patterns and financial health</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Financial Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Get insights into your spending patterns and financial health
+          </p>
         </div>
 
         {/* Quick Stats */}
@@ -67,7 +166,9 @@ const Dashboard = () => {
                 <stat.icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-foreground">{stat.value}</div>
+                <div className="text-2xl font-bold text-foreground">
+                  {stat.value}
+                </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
                   <span>{stat.description}</span>
                   <span className="text-primary font-medium">{stat.trend}</span>
@@ -79,28 +180,32 @@ const Dashboard = () => {
 
         {/* Charts */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <SpendingChart />
-          <CategoryChart />
+          <SpendingChart
+            data={dashboardData.spending_data.monthly_spending}
+            totalSpend={dashboardData.spending_data.total_monthly_spend}
+          />
+          <CategoryChart data={dashboardData.spending_data.category_spending} />
         </div>
 
         {/* Insights */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-foreground">Quick Insights</h2>
+            <h2 className="text-2xl font-bold text-foreground">
+              Quick Insights
+            </h2>
             <div className="flex items-center text-primary">
               <TrendingUp className="h-4 w-4 mr-2" />
-              <span className="text-sm font-medium">AI Powered</span>
+              <span className="text-sm font-medium">Real Data</span>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {insightCards.map((insight) => (
-              <InsightCard
-                key={insight.id}
-                insight={insight}
-                onActionClick={handleInsightClick}
-              />
-            ))}
+            <div className="col-span-full text-center py-8">
+              <p className="text-muted-foreground">
+                AI-powered insights will be available in Phase 2 with OpenAI
+                integration
+              </p>
+            </div>
           </div>
         </div>
       </main>

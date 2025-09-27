@@ -1,62 +1,67 @@
 package routes
 
 import (
-    "encoding/json"
-    "fmt"
     "net/http"
 
     "github.com/gin-gonic/gin"
+    "financeai-backend/services"
+    "financeai-backend/models"
 )
-
-const transactionsURL = baseURL + "/accounts/%s/purchases?key=%s"
 
 // RegisterInsightRoutes sets up /api/insights
 func RegisterInsightRoutes(rg *gin.RouterGroup, apiKey string) {
+    mockService := services.NewMockDataService()
+
     rg.GET("/insights", func(c *gin.Context) {
-        accountId := c.Query("accountId")
-        if accountId == "" {
-            c.JSON(http.StatusBadRequest, gin.H{"error": "accountId required"})
+        customerId := c.Query("customerId")
+        if customerId == "" {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "customerId required"})
             return
         }
 
-        // Fetch purchases for this account
-        url := fmt.Sprintf(transactionsURL, accountId, apiKey)
-        resp, err := http.Get(url)
+        // Get all transactions for the customer
+        transactions, err := mockService.GetAllCustomerTransactions(customerId)
         if err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to call Nessie"})
-            return
-        }
-        defer resp.Body.Close()
-
-        var transactions []map[string]interface{}
-        if err := json.NewDecoder(resp.Body).Decode(&transactions); err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse Nessie response"})
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
             return
         }
 
-        // TODO: replace with real analytics
-        insights := []map[string]string{
-            {
-                "id":      "1",
-                "message": "Dining spend up 22% this month",
-                "trend":   "negative",
-            },
-            {
-                "id":      "2",
-                "message": "Shopping spend down 10%",
-                "trend":   "positive",
-            },
-            {
-                "id":      "3",
-                "message": "Budget 85% complete with 5 days left",
-                "trend":   "neutral",
-            },
-        }
+        // Generate basic insights from transaction data
+        insights := generateInsights(transactions)
 
         c.JSON(http.StatusOK, gin.H{
-            "accountId":   accountId,
-            "transactions": transactions, // raw data if frontend wants to use it
-            "insights":    insights,      // summary insights
+            "customerId":  customerId,
+            "transactions": transactions,
+            "insights":    insights,
         })
     })
+}
+
+// generateInsights creates basic insights from transaction data
+func generateInsights(transactions []models.Transaction) []map[string]interface{} {
+    // For now, return mock insights
+    // In Phase 2, this will be replaced with OpenAI-powered insights
+    return []map[string]interface{}{
+        {
+            "id":      "1",
+            "title":   "Spending Analysis",
+            "message": "Based on your transaction history, you've made good progress this month",
+            "trend":   "positive",
+            "type":    "spending",
+        },
+        {
+            "id":      "2", 
+            "title":   "Budget Tracking",
+            "message": "You're on track to meet your monthly budget goals",
+            "trend":   "neutral",
+            "type":    "budget",
+        },
+        {
+            "id":      "3",
+            "title":   "Savings Opportunity",
+            "message": "Consider setting up automatic savings transfers",
+            "trend":   "positive", 
+            "type":    "savings",
+        },
+    }
 }
