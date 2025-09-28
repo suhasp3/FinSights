@@ -4,10 +4,12 @@ import "time"
 
 // Customer represents a customer from Nessie API
 type Customer struct {
-	ID          string `json:"_id"`
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	Address     Address `json:"address"`
+	ID          string    `json:"_id"`
+	Username    string    `json:"username"`
+	Password    string    `json:"password"`
+	FirstName   string    `json:"first_name"`
+	LastName    string    `json:"last_name"`
+	Address     Address   `json:"address"`
 	CreatedDate time.Time `json:"created_date"`
 }
 
@@ -22,50 +24,50 @@ type Address struct {
 
 // Account represents a bank account from Nessie API
 type Account struct {
-	ID           string  `json:"_id"`
-	Type         string  `json:"type"`
-	Nickname     string  `json:"nickname"`
-	Rewards      int     `json:"rewards"`
-	Balance      int     `json:"balance"`
+	ID            string `json:"_id"`
+	Type          string `json:"type"`
+	Nickname      string `json:"nickname"`
+	Rewards       int    `json:"rewards"`
+	Balance       int    `json:"balance"`
 	AccountNumber string `json:"account_number"`
-	CustomerID   string  `json:"customer_id"`
+	CustomerID    string `json:"customer_id"`
 }
 
 // Transaction represents a transaction from Nessie API
 type Transaction struct {
-	ID          string    `json:"_id"`
-	Type        string    `json:"type"`
-	Amount      float64   `json:"amount"`
-	Description string    `json:"description"`
+	ID              string    `json:"_id"`
+	Type            string    `json:"type"`
+	Amount          float64   `json:"amount"`
+	Description     string    `json:"description"`
 	TransactionDate time.Time `json:"transaction_date"`
-	Status      string    `json:"status"`
-	AccountID   string    `json:"account_id"`
-	MerchantID  string    `json:"merchant_id,omitempty"`
-	Merchant    Merchant  `json:"merchant,omitempty"`
+	Status          string    `json:"status"`
+	AccountID       string    `json:"account_id"`
+	MerchantID      string    `json:"merchant_id,omitempty"`
+	Merchant        Merchant  `json:"merchant,omitempty"`
 }
 
 // Merchant represents merchant information
 type Merchant struct {
-	ID   string `json:"_id"`
-	Name string `json:"name"`
+	ID       string `json:"_id"`
+	Name     string `json:"name"`
 	Category string `json:"category,omitempty"`
 }
 
 // DashboardData aggregates all data needed for the dashboard
 type DashboardData struct {
-	Customer     Customer     `json:"customer"`
-	Accounts     []Account    `json:"accounts"`
+	Customer     Customer      `json:"customer"`
+	Accounts     []Account     `json:"accounts"`
 	Transactions []Transaction `json:"transactions"`
-	SpendingData SpendingData `json:"spending_data"`
+	SpendingData SpendingData  `json:"spending_data"`
 }
 
 // SpendingData represents processed spending information
 type SpendingData struct {
-	MonthlySpending     []MonthlySpending     `json:"monthly_spending"`
-	DailySpending       []DailySpending       `json:"daily_spending"`
-	CategorySpending    []CategorySpending    `json:"category_spending"`
-	RecentTransactions  []RecentTransaction     `json:"recent_transactions"`
-	TotalMonthlySpend   float64               `json:"total_monthly_spend"`
+	MonthlySpending    []MonthlySpending   `json:"monthly_spending"`
+	DailySpending      []DailySpending     `json:"daily_spending"`
+	CategorySpending   []CategorySpending  `json:"category_spending"`
+	RecentTransactions []RecentTransaction `json:"recent_transactions"`
+	TotalMonthlySpend  float64             `json:"total_monthly_spend"`
 }
 
 // MonthlySpending represents spending by month

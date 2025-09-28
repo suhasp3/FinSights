@@ -47,7 +47,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Transactions</CardTitle>
+        <CardTitle className="text-lg font-semibold">Recent Transactions</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

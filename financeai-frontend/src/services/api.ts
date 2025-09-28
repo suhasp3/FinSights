@@ -3,6 +3,8 @@ const API_BASE_URL = "http://localhost:8081/api";
 
 export interface Customer {
   _id: string;
+  username: string;
+  password: string;
   first_name: string;
   last_name: string;
   address: {

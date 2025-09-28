@@ -4,30 +4,52 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { TrendingUp, User, ArrowRight } from "lucide-react";
+import { TrendingUp, User, Lock, ArrowRight } from "lucide-react";
 
 const Login = () => {
-  const [customerId, setCustomerId] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerId.trim()) return;
+    if (!username.trim() || !password.trim()) return;
 
     setIsLoading(true);
+    setError("");
 
-    // Simulate API call delay
-    setTimeout(() => {
-      // For now, just store the customer ID and navigate to dashboard
-      localStorage.setItem("customerId", customerId);
+    try {
+      const response = await fetch("http://localhost:8081/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+          password: password.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store the username and navigate to dashboard
+        localStorage.setItem("username", username);
+        
+        // Dispatch custom event to notify App component of login
+        window.dispatchEvent(new CustomEvent("login"));
+        
+        navigate("/");
+      } else {
+        setError(data.error || "Login failed");
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
+    } finally {
       setIsLoading(false);
-
-      // Dispatch custom event to notify App component of login
-      window.dispatchEvent(new CustomEvent("login"));
-
-      navigate("/");
-    }, 1000);
+    }
   };
 
   return (
@@ -50,36 +72,63 @@ const Login = () => {
               Welcome Back
             </CardTitle>
             <p className="text-muted-foreground mt-2">
-              Enter your customer ID to access your financial dashboard
+              Enter your credentials to access your financial dashboard
             </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
                 <Label
-                  htmlFor="customerId"
+                  htmlFor="username"
                   className="text-sm font-medium text-foreground"
                 >
-                  Customer ID
+                  Username
                 </Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="customerId"
+                    id="username"
                     type="text"
-                    placeholder="Enter your customer ID"
-                    value={customerId}
-                    onChange={(e) => setCustomerId(e.target.value)}
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     className="pl-10"
                     required
                   />
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-foreground"
+                >
+                  Password
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600 text-center">{error}</p>
+                </div>
+              )}
+
               <Button
                 type="submit"
                 className="w-full"
-                disabled={!customerId.trim() || isLoading}
+                disabled={!username.trim() || !password.trim() || isLoading}
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
@@ -98,7 +147,7 @@ const Login = () => {
             {/* Demo Info */}
             <div className="mt-6 p-4 bg-muted/50 rounded-lg">
               <p className="text-xs text-muted-foreground text-center">
-                <strong>Demo Mode:</strong> Use any customer ID to explore the
+                <strong>Demo Mode:</strong> Use any username/password to explore the
                 dashboard with sample data
               </p>
             </div>

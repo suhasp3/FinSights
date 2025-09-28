@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import { RecentTransactions } from "@/components/RecentTransactions";
 import { BudgetPlaceholder } from "@/components/BudgetPlaceholder";
+import { BudgetProgress } from "@/components/BudgetProgress";
 import CategoryChart from "@/components/CategoryChart";
 import { AIInsights } from "@/components/AIInsights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,13 +14,22 @@ import {
   Target,
   CreditCard,
   Loader2,
+  BarChart3,
 } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  // Get customer ID from localStorage
-  const customerId = localStorage.getItem("customerId");
+  // Get username from localStorage
+  const username = localStorage.getItem("username");
+
+  // Check if budgets exist in localStorage
+  const getBudgets = () => {
+    const budgets = localStorage.getItem("budgets");
+    return budgets ? JSON.parse(budgets) : null;
+  };
+
+  const budgets = getBudgets();
 
   // Fetch dashboard data from API
   const {
@@ -27,9 +37,9 @@ const Dashboard = () => {
     isLoading,
     error,
   } = useQuery<DashboardData>({
-    queryKey: ["dashboard", customerId],
-    queryFn: () => apiService.getDashboardData(customerId!),
-    enabled: !!customerId,
+    queryKey: ["dashboard", username],
+    queryFn: () => apiService.getDashboardData(username!),
+    enabled: !!username,
   });
 
   // Fetch AI insights
@@ -38,9 +48,9 @@ const Dashboard = () => {
     isLoading: aiInsightsLoading,
     error: aiInsightsError,
   } = useQuery({
-    queryKey: ["ai-insights", customerId],
-    queryFn: () => apiService.getAIInsights(customerId!),
-    enabled: !!customerId,
+    queryKey: ["ai-insights", username],
+    queryFn: () => apiService.getAIInsights(username!),
+    enabled: !!username,
   });
 
   const handleInsightClick = (insight: any) => {
@@ -160,7 +170,7 @@ const Dashboard = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Financial Dashboard
+            Hi, <span className="text-primary underline">{dashboardData.customer.first_name}</span>
           </h1>
           <p className="text-muted-foreground">
             Get insights into your spending patterns and financial health
@@ -181,13 +191,18 @@ const Dashboard = () => {
                 <div className="text-2xl font-bold text-foreground">
                   {stat.value}
                 </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                <div className="flex items-center justify-between text-sm text-muted-foreground mt-1">
                   <span>{stat.description}</span>
                   <span className="text-primary font-medium">{stat.trend}</span>
                 </div>
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Dashboard Section */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-4">Dashboard</h2>
         </div>
 
         {/* Recent Transactions and Budget Management */}
@@ -206,7 +221,20 @@ const Dashboard = () => {
             <CategoryChart
               data={dashboardData.spending_data.category_spending}
             />
-            <BudgetPlaceholder />
+            {budgets ? (
+              <BudgetProgress 
+                budgets={budgets}
+                spending={{
+                  transportation: dashboardData.spending_data.category_spending.find(c => c.category === "Transportation")?.amount || 0,
+                  foodDining: dashboardData.spending_data.category_spending.find(c => c.category === "Food & Dining")?.amount || 0,
+                  healthcare: dashboardData.spending_data.category_spending.find(c => c.category === "Healthcare")?.amount || 0,
+                  entertainment: dashboardData.spending_data.category_spending.find(c => c.category === "Entertainment")?.amount || 0,
+                  shopping: dashboardData.spending_data.category_spending.find(c => c.category === "Shopping")?.amount || 0,
+                }}
+              />
+            ) : (
+              <BudgetPlaceholder />
+            )}
           </div>
         </div>
 

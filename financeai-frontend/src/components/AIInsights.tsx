@@ -46,9 +46,6 @@ export function AIInsights({ insights, isLoading }: AIInsightsProps) {
     return (
       <Card className="col-span-full">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-primary" /> AI Financial Insights
-          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-8">
@@ -103,9 +100,6 @@ export function AIInsights({ insights, isLoading }: AIInsightsProps) {
   return (
     <Card className="col-span-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Lightbulb className="h-5 w-5 text-primary" /> AI Financial Insights
-        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

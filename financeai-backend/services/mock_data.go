@@ -1,8 +1,8 @@
 package services
 
 import (
-	"fmt"
 	"financeai-backend/models"
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -24,9 +24,11 @@ func NewMockDataService() *MockDataService {
 // initializeMockData creates realistic mock data for demo customers
 func (m *MockDataService) initializeMockData() {
 	// Demo Customer 1: Young Professional
-	m.customers["demo1"] = &models.DashboardData{
+	m.customers["sarah"] = &models.DashboardData{
 		Customer: models.Customer{
 			ID:        "demo1",
+			Username:  "sarah",
+			Password:  "password123",
 			FirstName: "Sarah",
 			LastName:  "Johnson",
 			Address: models.Address{
@@ -40,25 +42,25 @@ func (m *MockDataService) initializeMockData() {
 		},
 		Accounts: []models.Account{
 			{
-				ID:           "acc1",
-				Type:         "Checking",
-				Nickname:     "Primary Checking",
-				Rewards:      1250,
-				Balance:      3500,
+				ID:            "acc1",
+				Type:          "Checking",
+				Nickname:      "Primary Checking",
+				Rewards:       1250,
+				Balance:       3500,
 				AccountNumber: "****1234",
-				CustomerID: "demo1",
+				CustomerID:    "demo1",
 			},
 			{
-				ID:           "acc2",
-				Type:         "Savings",
-				Nickname:     "Emergency Fund",
-				Rewards:      0,
-				Balance:      8500,
+				ID:            "acc2",
+				Type:          "Savings",
+				Nickname:      "Emergency Fund",
+				Rewards:       0,
+				Balance:       8500,
 				AccountNumber: "****5678",
-				CustomerID:   "demo1",
+				CustomerID:    "demo1",
 			},
 		},
-		Transactions: m.generateTransactions("demo1"),
+		Transactions: m.generateTransactions("sarah"),
 		SpendingData: models.SpendingData{
 			MonthlySpending: []models.MonthlySpending{
 				{Month: "Jan", Amount: 3200},
@@ -87,9 +89,11 @@ func (m *MockDataService) initializeMockData() {
 	}
 
 	// Demo Customer 2: Family with Kids
-	m.customers["demo2"] = &models.DashboardData{
+	m.customers["michael"] = &models.DashboardData{
 		Customer: models.Customer{
 			ID:        "demo2",
+			Username:  "michael",
+			Password:  "password123",
 			FirstName: "Michael",
 			LastName:  "Chen",
 			Address: models.Address{
@@ -103,34 +107,34 @@ func (m *MockDataService) initializeMockData() {
 		},
 		Accounts: []models.Account{
 			{
-				ID:           "acc3",
-				Type:         "Checking",
-				Nickname:     "Family Checking",
-				Rewards:      2100,
-				Balance:      5200,
+				ID:            "acc3",
+				Type:          "Checking",
+				Nickname:      "Family Checking",
+				Rewards:       2100,
+				Balance:       5200,
 				AccountNumber: "****9012",
-				CustomerID:   "demo2",
+				CustomerID:    "demo2",
 			},
 			{
-				ID:           "acc4",
-				Type:         "Savings",
-				Nickname:     "Kids College Fund",
-				Rewards:      0,
-				Balance:      15000,
+				ID:            "acc4",
+				Type:          "Savings",
+				Nickname:      "Kids College Fund",
+				Rewards:       0,
+				Balance:       15000,
 				AccountNumber: "****3456",
-				CustomerID:   "demo2",
+				CustomerID:    "demo2",
 			},
 			{
-				ID:           "acc5",
-				Type:         "Credit Card",
-				Nickname:     "Family Rewards Card",
-				Rewards:      3500,
-				Balance:      -1200,
+				ID:            "acc5",
+				Type:          "Credit Card",
+				Nickname:      "Family Rewards Card",
+				Rewards:       3500,
+				Balance:       -1200,
 				AccountNumber: "****7890",
-				CustomerID:   "demo2",
+				CustomerID:    "demo2",
 			},
 		},
-		Transactions: m.generateTransactions("demo2"),
+		Transactions: m.generateTransactions("michael"),
 		SpendingData: models.SpendingData{
 			MonthlySpending: []models.MonthlySpending{
 				{Month: "Jan", Amount: 5200},
@@ -159,9 +163,11 @@ func (m *MockDataService) initializeMockData() {
 	}
 
 	// Demo Customer 3: Retiree
-	m.customers["demo3"] = &models.DashboardData{
+	m.customers["robert"] = &models.DashboardData{
 		Customer: models.Customer{
 			ID:        "demo3",
+			Username:  "robert",
+			Password:  "password123",
 			FirstName: "Robert",
 			LastName:  "Williams",
 			Address: models.Address{
@@ -175,25 +181,25 @@ func (m *MockDataService) initializeMockData() {
 		},
 		Accounts: []models.Account{
 			{
-				ID:           "acc6",
-				Type:         "Checking",
-				Nickname:     "Retirement Checking",
-				Rewards:      500,
-				Balance:      2800,
+				ID:            "acc6",
+				Type:          "Checking",
+				Nickname:      "Retirement Checking",
+				Rewards:       500,
+				Balance:       2800,
 				AccountNumber: "****2468",
-				CustomerID:   "demo3",
+				CustomerID:    "demo3",
 			},
 			{
-				ID:           "acc7",
-				Type:         "Savings",
-				Nickname:     "Travel Fund",
-				Rewards:      0,
-				Balance:      25000,
+				ID:            "acc7",
+				Type:          "Savings",
+				Nickname:      "Travel Fund",
+				Rewards:       0,
+				Balance:       25000,
 				AccountNumber: "****1357",
-				CustomerID:   "demo3",
+				CustomerID:    "demo3",
 			},
 		},
-		Transactions: m.generateTransactions("demo3"),
+		Transactions: m.generateTransactions("robert"),
 		SpendingData: models.SpendingData{
 			MonthlySpending: []models.MonthlySpending{
 				{Month: "Jan", Amount: 1800},
@@ -222,9 +228,11 @@ func (m *MockDataService) initializeMockData() {
 	}
 
 	// Demo Customer 4: Student
-	m.customers["demo4"] = &models.DashboardData{
+	m.customers["emma"] = &models.DashboardData{
 		Customer: models.Customer{
 			ID:        "demo4",
+			Username:  "emma",
+			Password:  "password123",
 			FirstName: "Emma",
 			LastName:  "Davis",
 			Address: models.Address{
@@ -238,16 +246,16 @@ func (m *MockDataService) initializeMockData() {
 		},
 		Accounts: []models.Account{
 			{
-				ID:           "acc8",
-				Type:         "Checking",
-				Nickname:     "Student Checking",
-				Rewards:      200,
-				Balance:      450,
+				ID:            "acc8",
+				Type:          "Checking",
+				Nickname:      "Student Checking",
+				Rewards:       200,
+				Balance:       450,
 				AccountNumber: "****3691",
-				CustomerID:   "demo4",
+				CustomerID:    "demo4",
 			},
 		},
-		Transactions: m.generateTransactions("demo4"),
+		Transactions: m.generateTransactions("emma"),
 		SpendingData: models.SpendingData{
 			MonthlySpending: []models.MonthlySpending{
 				{Month: "Jan", Amount: 800},
@@ -349,6 +357,104 @@ func (m *MockDataService) generateTransactions(customerID string) []models.Trans
 				Category: "Food & Dining",
 			},
 		},
+		{
+			ID:              "txn6",
+			Type:            "deposit",
+			Amount:          -75.00,
+			Description:     "Gas Station",
+			TransactionDate: time.Now().AddDate(0, 0, -9),
+			Status:          "completed",
+			AccountID:       "acc1",
+			Merchant: models.Merchant{
+				ID:       "merchant6",
+				Name:     "Shell",
+				Category: "Transportation",
+			},
+		},
+		{
+			ID:              "txn7",
+			Type:            "deposit",
+			Amount:          -200.00,
+			Description:     "Restaurant Dinner",
+			TransactionDate: time.Now().AddDate(0, 0, -12),
+			Status:          "completed",
+			AccountID:       "acc1",
+			Merchant: models.Merchant{
+				ID:       "merchant7",
+				Name:     "The Cheesecake Factory",
+				Category: "Food & Dining",
+			},
+		},
+		{
+			ID:              "txn8",
+			Type:            "deposit",
+			Amount:          -45.00,
+			Description:     "Movie Tickets",
+			TransactionDate: time.Now().AddDate(0, 0, -15),
+			Status:          "completed",
+			AccountID:       "acc1",
+			Merchant: models.Merchant{
+				ID:       "merchant8",
+				Name:     "AMC Theaters",
+				Category: "Entertainment",
+			},
+		},
+		{
+			ID:              "txn9",
+			Type:            "deposit",
+			Amount:          -120.00,
+			Description:     "Pharmacy",
+			TransactionDate: time.Now().AddDate(0, 0, -18),
+			Status:          "completed",
+			AccountID:       "acc1",
+			Merchant: models.Merchant{
+				ID:       "merchant9",
+				Name:     "CVS Pharmacy",
+				Category: "Healthcare",
+			},
+		},
+		{
+			ID:              "txn10",
+			Type:            "deposit",
+			Amount:          -85.00,
+			Description:     "Online Shopping",
+			TransactionDate: time.Now().AddDate(0, 0, -21),
+			Status:          "completed",
+			AccountID:       "acc1",
+			Merchant: models.Merchant{
+				ID:       "merchant10",
+				Name:     "Target",
+				Category: "Shopping",
+			},
+		},
+		{
+			ID:              "txn11",
+			Type:            "deposit",
+			Amount:          -35.00,
+			Description:     "Coffee Shop",
+			TransactionDate: time.Now().AddDate(0, 0, -24),
+			Status:          "completed",
+			AccountID:       "acc1",
+			Merchant: models.Merchant{
+				ID:       "merchant11",
+				Name:     "Blue Bottle Coffee",
+				Category: "Food & Dining",
+			},
+		},
+		{
+			ID:              "txn12",
+			Type:            "deposit",
+			Amount:          -150.00,
+			Description:     "Gym Membership",
+			TransactionDate: time.Now().AddDate(0, 0, -28),
+			Status:          "completed",
+			AccountID:       "acc1",
+			Merchant: models.Merchant{
+				ID:       "merchant12",
+				Name:     "Equinox",
+				Category: "Other",
+			},
+		},
 	}
 
 	// Add some randomness to make it more realistic
@@ -395,7 +501,17 @@ func (m *MockDataService) GetAllCustomerTransactions(customerID string) ([]model
 	return nil, fmt.Errorf("customer not found: %s", customerID)
 }
 
+// GetCustomerByCredentials validates username and password
+func (m *MockDataService) GetCustomerByCredentials(username, password string) (*models.Customer, error) {
+	if data, exists := m.customers[username]; exists {
+		if data.Customer.Password == password {
+			return &data.Customer, nil
+		}
+	}
+	return nil, fmt.Errorf("invalid credentials")
+}
+
 // GetAvailableCustomers returns list of available demo customers
 func (m *MockDataService) GetAvailableCustomers() []string {
-	return []string{"demo1", "demo2", "demo3", "demo4"}
+	return []string{"sarah", "michael", "robert", "emma"}
 }

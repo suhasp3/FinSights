@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { TrendingUp, MessageCircle, BarChart3, LogOut } from "lucide-react";
+import { TrendingUp, MessageCircle, BarChart3, Target, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,7 @@ const Navigation = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const handleLogout = () => {
-    localStorage.removeItem("customerId");
+    localStorage.removeItem("username");
     // Dispatch custom event to notify App component of logout
     window.dispatchEvent(new CustomEvent("logout"));
     navigate("/login");
@@ -22,10 +22,12 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="bg-primary rounded-lg p-2">
-              <TrendingUp className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-primary">FinanceAI</span>
+            <img 
+              src="/finsightslogo.png" 
+              alt="FinSights Logo" 
+              className="h-8 w-8 rounded-md"
+            />
+            <span className="text-xl font-bold text-primary">FinSights</span>
           </Link>
 
           {/* Navigation Links */}
@@ -53,6 +55,18 @@ const Navigation = () => {
             >
               <MessageCircle className="h-4 w-4" />
               <span>Insights & Chat</span>
+            </Link>
+            <Link
+              to="/budget"
+              className={cn(
+                "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                isActive("/budget")
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+            >
+              <Target className="h-4 w-4" />
+              <span>Budget</span>
             </Link>
             <Button
               variant="ghost"

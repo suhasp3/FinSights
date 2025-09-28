@@ -1,17 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Target, DollarSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, Target, DollarSign, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function BudgetPlaceholder() {
+  const navigate = useNavigate();
+
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Budget Management</CardTitle>
-          <Badge variant="outline" className="text-xs">
-            Coming Soon
-          </Badge>
-        </div>
+        <CardTitle className="text-lg font-semibold">Budget Management</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="text-center py-8">
@@ -19,11 +17,10 @@ export function BudgetPlaceholder() {
             <Target className="h-8 w-8 text-blue-600" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Smart Budget Planning
+            Set Up Your Budget
           </h3>
           <p className="text-gray-600 mb-6 max-w-sm mx-auto">
-            Set spending limits, track progress, and get personalized
-            recommendations to help you stay on budget.
+            Create monthly spending limits for each category to help manage your finances and track your progress.
           </p>
 
           <div className="grid grid-cols-1 gap-4 mb-6">
@@ -37,24 +34,29 @@ export function BudgetPlaceholder() {
             <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
               <TrendingUp className="h-5 w-5 text-blue-600" />
               <div className="text-left">
-                <p className="font-medium text-sm">Spending Alerts</p>
+                <p className="font-medium text-sm">Progress Tracking</p>
                 <p className="text-xs text-gray-600">
-                  Get notified when approaching limits
+                  Visual progress bars for each category
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
               <Target className="h-5 w-5 text-purple-600" />
               <div className="text-left">
-                <p className="font-medium text-sm">Smart Recommendations</p>
+                <p className="font-medium text-sm">Smart Insights</p>
                 <p className="text-xs text-gray-600">AI-powered savings tips</p>
               </div>
             </div>
           </div>
 
-          <div className="text-xs text-gray-500">
-            This feature will be available in a future update
-          </div>
+          <Button 
+            onClick={() => navigate("/budget")}
+            className="w-full"
+          >
+            <Target className="h-4 w-4 mr-2" />
+            Set Up Budget
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
         </div>
       </CardContent>
     </Card>
