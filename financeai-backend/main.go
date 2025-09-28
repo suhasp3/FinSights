@@ -32,6 +32,11 @@ func main() {
 
     r := gin.Default()
 
+    // Add simple health check endpoint
+    r.GET("/health", func(c *gin.Context) {
+        c.JSON(200, gin.H{"status": "ok", "message": "FinSights API is running"})
+    })
+
     // Add CORS middleware
     r.Use(func(c *gin.Context) {
         c.Header("Access-Control-Allow-Origin", "*")
@@ -55,5 +60,11 @@ func main() {
     }
     
     fmt.Printf("🚀 Backend running on port %s\n", port)
-    r.Run(":" + port)
+    fmt.Printf("🔍 Health check available at: http://localhost:%s/health\n", port)
+    fmt.Printf("📊 API endpoints available at: http://localhost:%s/api/\n", port)
+    
+    if err := r.Run(":" + port); err != nil {
+        fmt.Printf("❌ Failed to start server: %v\n", err)
+        os.Exit(1)
+    }
 }
