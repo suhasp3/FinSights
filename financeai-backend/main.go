@@ -69,7 +69,7 @@ func main() {
 
     port := os.Getenv("PORT")
     if port == "" {
-        port = "8081"
+        port = "8080"
     }
     
     fmt.Printf("🚀 Starting FinSights Backend...\n")
@@ -81,9 +81,18 @@ func main() {
     // Add a simple test endpoint that doesn't require any services
     r.GET("/", func(c *gin.Context) {
         c.JSON(200, gin.H{
-            "status": "ok", 
+            "status": "ok",
             "message": "FinSights API is running",
             "port": port,
+            "timestamp": time.Now().Format(time.RFC3339),
+            "version": "1.0.0",
+        })
+    })
+    
+    // Add a simple ping endpoint for Railway health checks
+    r.GET("/ping", func(c *gin.Context) {
+        c.JSON(200, gin.H{
+            "status": "pong",
             "timestamp": time.Now().Format(time.RFC3339),
         })
     })
