@@ -49,6 +49,11 @@ func main() {
     // pass apiKey down to routes
     routes.RegisterRoutes(r, apiKey, openAIKey)
 
-    fmt.Println("🚀 Backend running on http://localhost:8081")
-    r.Run(":8081")
+    port := os.Getenv("PORT")
+    if port == "" {
+        port = "8081"
+    }
+    
+    fmt.Printf("🚀 Backend running on port %s\n", port)
+    r.Run(":" + port)
 }
