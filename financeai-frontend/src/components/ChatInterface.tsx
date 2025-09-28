@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Send, Bot, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { apiService } from "@/services/api";
 
 interface Message {
   id: string;
@@ -14,19 +15,28 @@ interface Message {
 
 interface ChatInterfaceProps {
   initialMessage?: string;
+  insight?: {
+    title: string;
+    description: string;
+    category: string;
+    amount: string;
+    tip: string;
+  };
 }
 
-const ChatInterface = ({ initialMessage }: ChatInterfaceProps) => {
+const ChatInterface = ({ initialMessage, insight }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hi! I'm your personal finance AI assistant. I can help you understand your spending patterns, create budgets, and answer questions about your finances. What would you like to know?",
+      content:
+        "Hi! I'm your personal finance AI assistant. I can help you understand your spending patterns, create budgets, and answer questions about your finances. What would you like to know?",
       sender: "ai",
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [processedInsight, setProcessedInsight] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -38,24 +48,97 @@ const ChatInterface = ({ initialMessage }: ChatInterfaceProps) => {
   }, [messages]);
 
   useEffect(() => {
-    if (initialMessage) {
+    // Prioritize insight over initial message to avoid double responses
+    if (insight && insight.title !== processedInsight) {
+      setProcessedInsight(insight.title);
+      handleInsightMessage(insight);
+    } else if (initialMessage && initialMessage.trim()) {
       handleSendMessage(initialMessage);
     }
-  }, [initialMessage]);
+  }, [initialMessage, insight, processedInsight]);
 
-  const simulateAIResponse = (userMessage: string): string => {
-    const responses = {
-      coffee: "Based on your spending data, you've spent $120 on coffee this month, which is $40 over your usual $80 average. I recommend setting a weekly coffee budget of $20 to stay on track. You could also try making coffee at home 2-3 days per week to save around $15-20 weekly.",
-      save: "Great question! Based on your current spending patterns, here are 3 ways to save $200 in 3 months: 1) Reduce dining out by $70/month (cook 2 more meals at home weekly), 2) Cancel unused subscriptions worth $30/month, 3) Use public transport instead of rideshare 8 times per month to save $100/month.",
-      budget: "I'd be happy to help you create a budget! Based on your spending history, I recommend the 50/30/20 rule: 50% for needs ($1,700), 30% for wants ($1,020), and 20% for savings ($680). Your current spending suggests you're spending about 15% more on wants. Would you like me to create a detailed monthly budget plan?",
-      default: "I understand you're asking about your finances. Could you be more specific? I can help with budgeting, spending analysis, savings goals, or answer questions about specific categories like dining, transportation, or entertainment expenses."
-    };
+  const getAIResponse = async (userMessage: string): Promise<string> => {
+    try {
+      const username = localStorage.getItem("username");
+      if (!username) {
+        return "Please log in to use the AI assistant.";
+      }
 
-    const lowerMessage = userMessage.toLowerCase();
-    if (lowerMessage.includes("coffee")) return responses.coffee;
-    if (lowerMessage.includes("save") && lowerMessage.includes("200")) return responses.save;
-    if (lowerMessage.includes("budget")) return responses.budget;
-    return responses.default;
+      // Convert messages to history format (exclude the initial greeting and current message)
+      const history = messages
+        .filter((msg) => msg.id !== "1" && msg.sender !== "user") // Exclude initial greeting and current user message
+        .slice(-8) // Keep last 8 messages to avoid token limits
+        .map((msg) => ({
+          role: msg.sender === "user" ? "user" : "assistant",
+          content: msg.content,
+        }));
+
+      const response = await apiService.sendChatMessage(
+        userMessage,
+        username,
+        history
+      );
+      return response.response;
+    } catch (error) {
+      console.error("AI response error:", error);
+      return "I'm having trouble connecting to my AI assistant right now. Please try again in a moment, or feel free to ask about your spending patterns, budgeting tips, or any financial questions you have!";
+    }
+  };
+
+  const handleInsightMessage = async (insight: any) => {
+    try {
+      const username = localStorage.getItem("username");
+      if (!username) {
+        return;
+      }
+
+      // Add user message first
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        content: `Tell me more about: ${insight.title} - ${insight.description}`,
+        sender: "user",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, userMessage]);
+
+      // Show typing indicator
+      setIsTyping(true);
+
+      // Convert messages to history format (exclude the initial greeting and current message)
+      const history = messages
+        .filter((msg) => msg.id !== "1" && msg.sender !== "user") // Exclude initial greeting and current user message
+        .slice(-8) // Keep last 8 messages to avoid token limits
+        .map((msg) => ({
+          role: msg.sender === "user" ? "user" : "assistant",
+          content: msg.content,
+        }));
+
+      const response = await apiService.getInsightDetails(
+        insight,
+        username,
+        history
+      );
+
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: response.response,
+        sender: "ai",
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      console.error("Insight details error:", error);
+      const fallbackMessage: Message = {
+        id: Date.now().toString(),
+        content: `Here's more about your ${insight.category} insight: ${insight.description}. ${insight.tip}`,
+        sender: "ai",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, fallbackMessage]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleSendMessage = async (messageContent?: string) => {
@@ -69,21 +152,35 @@ const ChatInterface = ({ initialMessage }: ChatInterfaceProps) => {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
     setInput("");
     setIsTyping(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
+    try {
+      // Get AI response
+      const aiResponseText = await getAIResponse(content);
+
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: simulateAIResponse(content),
+        content: aiResponseText,
         sender: "ai",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, aiResponse]);
+
+      setMessages((prev) => [...prev, aiResponse]);
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content:
+          "I'm having trouble connecting to my AI assistant right now. Please try again in a moment!",
+        sender: "ai",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1000 + Math.random() * 2000);
+    }
   };
 
   return (
@@ -94,8 +191,12 @@ const ChatInterface = ({ initialMessage }: ChatInterfaceProps) => {
           <Bot className="h-4 w-4 text-primary-foreground" />
         </div>
         <div>
-          <h3 className="font-semibold text-foreground">Finance AI Assistant</h3>
-          <p className="text-xs text-muted-foreground">Online and ready to help</p>
+          <h3 className="font-semibold text-foreground">
+            Finance AI Assistant
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Online and ready to help
+          </p>
         </div>
       </div>
 
@@ -112,14 +213,16 @@ const ChatInterface = ({ initialMessage }: ChatInterfaceProps) => {
             <div
               className={cn(
                 "flex max-w-[80%] space-x-2",
-                message.sender === "user" ? "flex-row-reverse space-x-reverse" : "flex-row"
+                message.sender === "user"
+                  ? "flex-row-reverse space-x-reverse"
+                  : "flex-row"
               )}
             >
               <div
                 className={cn(
                   "rounded-full p-2 flex-shrink-0",
-                  message.sender === "user" 
-                    ? "bg-accent text-accent-foreground" 
+                  message.sender === "user"
+                    ? "bg-accent text-accent-foreground"
                     : "bg-muted text-muted-foreground"
                 )}
               >
@@ -137,13 +240,20 @@ const ChatInterface = ({ initialMessage }: ChatInterfaceProps) => {
                     : "bg-muted/50 text-foreground"
                 )}
               >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {message.content}
-                </p>
+                <div
+                  className="text-sm leading-relaxed whitespace-pre-wrap prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: message.content
+                      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+                      .replace(/^(\d+)\.\s/gm, "<strong>$1.</strong> ")
+                      .replace(/\n/g, "<br/>"),
+                  }}
+                />
                 <p className="text-xs opacity-70 mt-2">
-                  {message.timestamp.toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
+                  {message.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                 </p>
               </Card>
@@ -160,8 +270,14 @@ const ChatInterface = ({ initialMessage }: ChatInterfaceProps) => {
               <Card className="bg-muted/50 p-3">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
-                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                  <div
+                    className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"
+                    style={{ animationDelay: "0.1s" }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
                 </div>
               </Card>
             </div>
@@ -177,7 +293,9 @@ const ChatInterface = ({ initialMessage }: ChatInterfaceProps) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about your spending, budgets, or financial goals..."
-            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+            onKeyPress={(e) =>
+              e.key === "Enter" && !e.shiftKey && handleSendMessage()
+            }
             className="flex-1"
           />
           <Button

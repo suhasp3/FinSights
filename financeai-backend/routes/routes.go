@@ -12,5 +12,6 @@ func RegisterRoutes(r *gin.Engine, apiKey string, openAIKey string) {
         RegisterAccountRoutes(api, apiKey)
         RegisterInsightRoutes(api, apiKey)
         RegisterAIInsightRoutes(api, openAIKey)
+        RegisterChatbotRoutes(api, openAIKey)
     }
 }

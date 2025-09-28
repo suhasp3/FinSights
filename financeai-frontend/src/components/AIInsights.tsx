@@ -1,8 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, TrendingUp, Target, Lightbulb } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DollarSign,
+  TrendingUp,
+  Target,
+  Lightbulb,
+  MessageCircle,
+} from "lucide-react";
 import { AIInsight } from "@/services/api";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface AIInsightsProps {
   insights: AIInsight[];
@@ -10,6 +18,17 @@ interface AIInsightsProps {
 }
 
 export function AIInsights({ insights, isLoading }: AIInsightsProps) {
+  const navigate = useNavigate();
+
+  const handleLearnMore = (insight: AIInsight) => {
+    // Navigate to insights page with the specific insight
+    navigate("/insights", {
+      state: {
+        selectedInsight: insight,
+        fromDashboard: true,
+      },
+    });
+  };
   const getCategoryIcon = (category: string) => {
     switch (category.toLowerCase()) {
       case "food & dining":
@@ -45,8 +64,7 @@ export function AIInsights({ insights, isLoading }: AIInsightsProps) {
   if (isLoading) {
     return (
       <Card className="col-span-full">
-        <CardHeader>
-        </CardHeader>
+        <CardHeader></CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
@@ -71,23 +89,25 @@ export function AIInsights({ insights, isLoading }: AIInsightsProps) {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Lightbulb className="h-4 w-4" />
-                  <h3 className="font-semibold text-sm">Welcome to AI Insights!</h3>
+                  <h3 className="font-semibold text-sm">
+                    Welcome to AI Insights!
+                  </h3>
                 </div>
                 <Badge className={`text-xs ${getCategoryColor("General")}`}>
                   General
                 </Badge>
               </div>
               <p className="text-sm text-gray-700 mb-3">
-                AI-powered financial insights are being generated for your spending patterns.
+                AI-powered financial insights are being generated for your
+                spending patterns.
               </p>
               <div className="flex items-center justify-between">
-                <div className="text-xs text-gray-500">
-                  Amount: Coming Soon
-                </div>
+                <div className="text-xs text-gray-500">Amount: Coming Soon</div>
               </div>
               <div className="mt-3 p-3 bg-blue-50 rounded-md border-l-4 border-blue-400">
                 <p className="text-xs text-blue-800">
-                  Tip: Check back soon for personalized financial advice based on your spending habits.
+                  Tip: Check back soon for personalized financial advice based
+                  on your spending habits.
                 </p>
               </div>
             </div>
@@ -99,8 +119,7 @@ export function AIInsights({ insights, isLoading }: AIInsightsProps) {
 
   return (
     <Card className="col-span-full">
-      <CardHeader>
-      </CardHeader>
+      <CardHeader></CardHeader>
       <CardContent>
         <div className="space-y-4">
           {insights.map((insight, index) => (
@@ -124,16 +143,23 @@ export function AIInsights({ insights, isLoading }: AIInsightsProps) {
                 {insight.description}
               </p>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-3">
                 <div className="text-xs text-gray-500">
                   Amount: {insight.amount}
                 </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleLearnMore(insight)}
+                  className="text-xs"
+                >
+                  <MessageCircle className="h-3 w-3 mr-1" />
+                  Learn More
+                </Button>
               </div>
 
               <div className="mt-3 p-3 bg-blue-50 rounded-md border-l-4 border-blue-400">
-                <p className="text-xs text-blue-800">
-                  Tip: {insight.tip}
-                </p>
+                <p className="text-xs text-blue-800">Tip: {insight.tip}</p>
               </div>
             </div>
           ))}
