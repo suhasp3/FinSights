@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
-import SpendingChart from "@/components/SpendingChart";
+import { RecentTransactions } from "@/components/RecentTransactions";
+import { BudgetPlaceholder } from "@/components/BudgetPlaceholder";
 import CategoryChart from "@/components/CategoryChart";
 import InsightCard from "@/components/InsightCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -178,13 +179,24 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <SpendingChart
-            data={dashboardData.spending_data.monthly_spending}
-            totalSpend={dashboardData.spending_data.total_monthly_spend}
+        {/* Recent Transactions and Budget Management */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <RecentTransactions
+            transactions={dashboardData.transactions.map((t) => ({
+              id: t._id,
+              description: t.description,
+              amount: t.amount,
+              date: t.transaction_date,
+              category: t.merchant?.category || "Other",
+              merchant: t.merchant?.name || "Unknown",
+            }))}
           />
-          <CategoryChart data={dashboardData.spending_data.category_spending} />
+          <div className="space-y-6">
+            <CategoryChart
+              data={dashboardData.spending_data.category_spending}
+            />
+            <BudgetPlaceholder />
+          </div>
         </div>
 
         {/* Insights */}
