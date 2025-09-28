@@ -111,6 +111,17 @@ func main() {
     addr := "0.0.0.0:" + port
     fmt.Printf("🌐 Binding to: %s\n", addr)
     
+    // Add a simple test endpoint that Railway can use
+    r.GET("/test", func(c *gin.Context) {
+        c.JSON(200, gin.H{
+            "status": "working",
+            "message": "Server is responding",
+            "timestamp": time.Now().Format(time.RFC3339),
+        })
+    })
+    
+    fmt.Printf("🚀 Starting server on %s...\n", addr)
+    
     if err := r.Run(addr); err != nil {
         fmt.Printf("❌ Failed to start server: %v\n", err)
         os.Exit(1)
