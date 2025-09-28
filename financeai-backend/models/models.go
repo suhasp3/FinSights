@@ -61,9 +61,11 @@ type DashboardData struct {
 
 // SpendingData represents processed spending information
 type SpendingData struct {
-	MonthlySpending []MonthlySpending `json:"monthly_spending"`
-	CategorySpending []CategorySpending `json:"category_spending"`
-	TotalMonthlySpend float64 `json:"total_monthly_spend"`
+	MonthlySpending     []MonthlySpending     `json:"monthly_spending"`
+	DailySpending       []DailySpending       `json:"daily_spending"`
+	CategorySpending    []CategorySpending    `json:"category_spending"`
+	RecentTransactions  []RecentTransaction     `json:"recent_transactions"`
+	TotalMonthlySpend   float64               `json:"total_monthly_spend"`
 }
 
 // MonthlySpending represents spending by month
@@ -77,6 +79,31 @@ type CategorySpending struct {
 	Category string  `json:"category"`
 	Amount   float64 `json:"amount"`
 	Color    string  `json:"color"`
+}
+
+// DailySpending represents spending by day
+type DailySpending struct {
+	Day    string  `json:"day"`
+	Amount float64 `json:"amount"`
+}
+
+// RecentTransaction represents a recent transaction for display
+type RecentTransaction struct {
+	ID          string    `json:"id"`
+	Description string    `json:"description"`
+	Amount      float64   `json:"amount"`
+	Date        time.Time `json:"date"`
+	Category    string    `json:"category"`
+	Merchant    string    `json:"merchant"`
+}
+
+// SpendingInsight represents AI-generated financial insights
+type SpendingInsight struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Category    string `json:"category"`
+	Amount      string `json:"amount"`
+	Tip         string `json:"tip"`
 }
 
 // NessieResponse represents the standard Nessie API response format

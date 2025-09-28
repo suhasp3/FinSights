@@ -4,7 +4,7 @@ import Navigation from "@/components/Navigation";
 import { RecentTransactions } from "@/components/RecentTransactions";
 import { BudgetPlaceholder } from "@/components/BudgetPlaceholder";
 import CategoryChart from "@/components/CategoryChart";
-import InsightCard from "@/components/InsightCard";
+import { AIInsights } from "@/components/AIInsights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiService, DashboardData } from "@/services/api";
 import {
@@ -29,6 +29,17 @@ const Dashboard = () => {
   } = useQuery<DashboardData>({
     queryKey: ["dashboard", customerId],
     queryFn: () => apiService.getDashboardData(customerId!),
+    enabled: !!customerId,
+  });
+
+  // Fetch AI insights
+  const {
+    data: aiInsightsData,
+    isLoading: aiInsightsLoading,
+    error: aiInsightsError,
+  } = useQuery({
+    queryKey: ["ai-insights", customerId],
+    queryFn: () => apiService.getAIInsights(customerId!),
     enabled: !!customerId,
   });
 
@@ -199,26 +210,22 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Insights */}
+        {/* AI Insights */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-foreground">
-              Quick Insights
+              AI Financial Insights
             </h2>
             <div className="flex items-center text-primary">
               <TrendingUp className="h-4 w-4 mr-2" />
-              <span className="text-sm font-medium">Real Data</span>
+              <span className="text-sm font-medium">Powered by OpenAI</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div className="col-span-full text-center py-8">
-              <p className="text-muted-foreground">
-                AI-powered insights will be available in Phase 2 with OpenAI
-                integration
-              </p>
-            </div>
-          </div>
+          <AIInsights 
+            insights={aiInsightsData?.insights || []} 
+            isLoading={aiInsightsLoading}
+          />
         </div>
       </main>
     </div>

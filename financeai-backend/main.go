@@ -14,12 +14,20 @@ func main() {
     // load .env
     godotenv.Load()
     apiKey := os.Getenv("NESSIE_KEY")
+    openAIKey := os.Getenv("OPEN_AI_KEY")
+    
     if apiKey == "" {
-        // Use the provided API key as fallback
-        apiKey = "4916cbea7b4b63696c1182758c20811f"
-        fmt.Println("⚠️ Using fallback Nessie API key")
+        fmt.Println("⚠️ Nessie API key not found, using mock data only")
     } else {
         fmt.Println("✅ Using Nessie API key from environment")
+    }
+    
+    if openAIKey == "" {
+        fmt.Println("❌ OpenAI API key not found in environment variables")
+        fmt.Println("Please set OPEN_AI_KEY environment variable")
+        os.Exit(1)
+    } else {
+        fmt.Println("✅ Using OpenAI API key from environment")
     }
 
     r := gin.Default()
@@ -39,7 +47,7 @@ func main() {
     })
 
     // pass apiKey down to routes
-    routes.RegisterRoutes(r, apiKey)
+    routes.RegisterRoutes(r, apiKey, openAIKey)
 
     fmt.Println("🚀 Backend running on http://localhost:8081")
     r.Run(":8081")

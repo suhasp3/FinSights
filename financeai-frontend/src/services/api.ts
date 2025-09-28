@@ -54,8 +54,32 @@ export interface CategorySpending {
 
 export interface SpendingData {
   monthly_spending: MonthlySpending[];
+  daily_spending: DailySpending[];
   category_spending: CategorySpending[];
+  recent_transactions: RecentTransaction[];
   total_monthly_spend: number;
+}
+
+export interface DailySpending {
+  day: string;
+  amount: number;
+}
+
+export interface RecentTransaction {
+  id: string;
+  description: string;
+  amount: number;
+  date: string;
+  category: string;
+  merchant: string;
+}
+
+export interface AIInsight {
+  title: string;
+  description: string;
+  category: string;
+  amount: string;
+  tip: string;
 }
 
 export interface DashboardData {
@@ -113,6 +137,11 @@ class ApiService {
   // Get complete dashboard data
   async getDashboardData(customerId: string): Promise<DashboardData> {
     return this.request<DashboardData>(`/dashboard?customerId=${customerId}`);
+  }
+
+  // Get AI insights
+  async getAIInsights(customerId: string): Promise<{ insights: AIInsight[] }> {
+    return this.request<{ insights: AIInsight[] }>(`/ai-insights?customerId=${customerId}`);
   }
 }
 
