@@ -20,15 +20,79 @@ const Insights = () => {
   // Get username from localStorage
   const username = localStorage.getItem("username");
 
+  // Get budget data from localStorage
+  const getBudgets = () => {
+    const budgets = localStorage.getItem("budgets");
+    return budgets ? JSON.parse(budgets) : null;
+  };
+  const budgets = getBudgets();
+
+  // Calculate actual spending from transactions to match AI insights
+  const calculateSpendingFromTransactions = (transactions: any[]) => {
+    const spending = {
+      transportation: 0,
+      foodDining: 0,
+      healthcare: 0,
+      entertainment: 0,
+      shopping: 0,
+    };
+
+    transactions.forEach((txn) => {
+      if (txn.amount < 0) {
+        // Only count expenses
+        const amount = Math.abs(txn.amount);
+        const category = txn.merchant?.category || "Other";
+
+        switch (category) {
+          case "Food & Dining":
+            spending.foodDining += amount;
+            break;
+          case "Transportation":
+            spending.transportation += amount;
+            break;
+          case "Healthcare":
+            spending.healthcare += amount;
+            break;
+          case "Entertainment":
+            spending.entertainment += amount;
+            break;
+          case "Shopping":
+            spending.shopping += amount;
+            break;
+        }
+      }
+    });
+
+    return spending;
+  };
+
+  // Fetch dashboard data first to get transactions
+  const { data: dashboardData, isLoading: dashboardLoading } = useQuery({
+    queryKey: ["dashboard", username],
+    queryFn: () => apiService.getDashboardData(username!),
+    enabled: !!username,
+  });
+
   // Fetch AI insights
   const {
     data: aiInsightsData,
     isLoading: aiInsightsLoading,
     error: aiInsightsError,
   } = useQuery({
-    queryKey: ["ai-insights", username],
-    queryFn: () => apiService.getAIInsights(username!),
-    enabled: !!username,
+    queryKey: ["ai-insights", username, budgets],
+    queryFn: () => {
+      // Convert budget data to the format expected by the backend
+      const budgetData: { [key: string]: number } = {};
+      if (budgets) {
+        budgetData.transportation = budgets.transportation || 0;
+        budgetData.foodDining = budgets.foodDining || 0;
+        budgetData.healthcare = budgets.healthcare || 0;
+        budgetData.entertainment = budgets.entertainment || 0;
+        budgetData.shopping = budgets.shopping || 0;
+      }
+      return apiService.getAIInsights(username!, budgetData);
+    },
+    enabled: !!username && !!dashboardData,
   });
 
   useEffect(() => {

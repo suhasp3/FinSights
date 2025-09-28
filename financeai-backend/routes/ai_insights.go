@@ -13,22 +13,31 @@ func RegisterAIInsightRoutes(rg *gin.RouterGroup, apiKey string) {
 	aiService := services.NewOpenAIService(apiKey)
 	mockService := services.NewMockDataService()
 
-	rg.GET("/ai-insights", func(c *gin.Context) {
-		customerId := c.Query("customerId")
-		if customerId == "" {
+	rg.POST("/ai-insights", func(c *gin.Context) {
+		var request struct {
+			CustomerId string            `json:"customerId"`
+			BudgetData map[string]float64 `json:"budgetData"`
+		}
+
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
+			return
+		}
+
+		if request.CustomerId == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "customerId required"})
 			return
 		}
 
 		// Get customer data
-		dashboardData, err := mockService.GetDashboardData(customerId)
+		dashboardData, err := mockService.GetDashboardData(request.CustomerId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		// Generate AI insights
-		insights, err := aiService.GenerateInsights(dashboardData.Transactions, dashboardData.SpendingData.TotalMonthlySpend)
+		// Generate AI insights with budget data
+		insights, err := aiService.GenerateInsights(dashboardData.Transactions, dashboardData.SpendingData.TotalMonthlySpend, request.BudgetData)
 		if err != nil {
 			// Log the error for debugging
 			fmt.Printf("AI Insights Error: %v\n", err)
@@ -45,7 +54,7 @@ func RegisterAIInsightRoutes(rg *gin.RouterGroup, apiKey string) {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"customerId": customerId,
+			"customerId": request.CustomerId,
 			"insights":   insights,
 		})
 	})

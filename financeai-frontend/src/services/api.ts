@@ -142,10 +142,17 @@ class ApiService {
   }
 
   // Get AI insights
-  async getAIInsights(customerId: string): Promise<{ insights: AIInsight[] }> {
-    return this.request<{ insights: AIInsight[] }>(
-      `/ai-insights?customerId=${customerId}`
-    );
+  async getAIInsights(
+    customerId: string,
+    budgetData?: { [key: string]: number }
+  ): Promise<{ insights: AIInsight[] }> {
+    return this.request<{ insights: AIInsight[] }>("/ai-insights", {
+      method: "POST",
+      body: JSON.stringify({
+        customerId,
+        budgetData: budgetData || {},
+      }),
+    });
   }
 
   // Chat with AI assistant

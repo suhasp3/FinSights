@@ -31,6 +31,45 @@ const Dashboard = () => {
 
   const budgets = getBudgets();
 
+  // Calculate actual spending from transactions to match AI insights
+  const calculateSpendingFromTransactions = (transactions: any[]) => {
+    const spending = {
+      transportation: 0,
+      foodDining: 0,
+      healthcare: 0,
+      entertainment: 0,
+      shopping: 0,
+    };
+
+    transactions.forEach((txn) => {
+      if (txn.amount < 0) {
+        // Only count expenses
+        const amount = Math.abs(txn.amount);
+        const category = txn.merchant?.category || "Other";
+
+        switch (category) {
+          case "Food & Dining":
+            spending.foodDining += amount;
+            break;
+          case "Transportation":
+            spending.transportation += amount;
+            break;
+          case "Healthcare":
+            spending.healthcare += amount;
+            break;
+          case "Entertainment":
+            spending.entertainment += amount;
+            break;
+          case "Shopping":
+            spending.shopping += amount;
+            break;
+        }
+      }
+    });
+
+    return spending;
+  };
+
   // Fetch dashboard data from API
   const {
     data: dashboardData,
@@ -48,8 +87,19 @@ const Dashboard = () => {
     isLoading: aiInsightsLoading,
     error: aiInsightsError,
   } = useQuery({
-    queryKey: ["ai-insights", username],
-    queryFn: () => apiService.getAIInsights(username!),
+    queryKey: ["ai-insights", username, budgets],
+    queryFn: () => {
+      // Convert budget data to the format expected by the backend
+      const budgetData: { [key: string]: number } = {};
+      if (budgets) {
+        budgetData.transportation = budgets.transportation || 0;
+        budgetData.foodDining = budgets.foodDining || 0;
+        budgetData.healthcare = budgets.healthcare || 0;
+        budgetData.entertainment = budgets.entertainment || 0;
+        budgetData.shopping = budgets.shopping || 0;
+      }
+      return apiService.getAIInsights(username!, budgetData);
+    },
     enabled: !!username,
   });
 
@@ -132,7 +182,13 @@ const Dashboard = () => {
   }
 
   // Calculate quick stats from real data
-  const totalMonthlySpend = dashboardData.spending_data.total_monthly_spend;
+  const calculatedSpending = calculateSpendingFromTransactions(
+    dashboardData.transactions
+  );
+  const totalMonthlySpend = Object.values(calculatedSpending).reduce(
+    (sum, amount) => sum + amount,
+    0
+  );
   const accountCount = dashboardData.accounts.length;
   const totalBalance = dashboardData.accounts.reduce(
     (sum, account) => sum + account.balance,
@@ -170,7 +226,10 @@ const Dashboard = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Hi, <span className="text-primary underline">{dashboardData.customer.first_name}</span>
+            Hi,{" "}
+            <span className="text-primary underline">
+              {dashboardData.customer.first_name}
+            </span>
           </h1>
           <p className="text-muted-foreground">
             Get insights into your spending patterns and financial health
@@ -219,18 +278,42 @@ const Dashboard = () => {
           />
           <div className="space-y-6">
             <CategoryChart
-              data={dashboardData.spending_data.category_spending}
+              data={Object.entries(
+                calculateSpendingFromTransactions(dashboardData.transactions)
+              ).map(([category, amount]) => ({
+                category:
+                  category === "foodDining"
+                    ? "Food & Dining"
+                    : category === "transportation"
+                    ? "Transportation"
+                    : category === "healthcare"
+                    ? "Healthcare"
+                    : category === "entertainment"
+                    ? "Entertainment"
+                    : category === "shopping"
+                    ? "Shopping"
+                    : category,
+                amount,
+                color:
+                  category === "foodDining"
+                    ? "#ef4444"
+                    : category === "transportation"
+                    ? "#3b82f6"
+                    : category === "healthcare"
+                    ? "#10b981"
+                    : category === "entertainment"
+                    ? "#f59e0b"
+                    : category === "shopping"
+                    ? "#8b5cf6"
+                    : "#6b7280",
+              }))}
             />
             {budgets ? (
-              <BudgetProgress 
+              <BudgetProgress
                 budgets={budgets}
-                spending={{
-                  transportation: dashboardData.spending_data.category_spending.find(c => c.category === "Transportation")?.amount || 0,
-                  foodDining: dashboardData.spending_data.category_spending.find(c => c.category === "Food & Dining")?.amount || 0,
-                  healthcare: dashboardData.spending_data.category_spending.find(c => c.category === "Healthcare")?.amount || 0,
-                  entertainment: dashboardData.spending_data.category_spending.find(c => c.category === "Entertainment")?.amount || 0,
-                  shopping: dashboardData.spending_data.category_spending.find(c => c.category === "Shopping")?.amount || 0,
-                }}
+                spending={calculateSpendingFromTransactions(
+                  dashboardData.transactions
+                )}
               />
             ) : (
               <BudgetPlaceholder />
@@ -250,8 +333,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <AIInsights 
-            insights={aiInsightsData?.insights || []} 
+          <AIInsights
+            insights={aiInsightsData?.insights || []}
             isLoading={aiInsightsLoading}
           />
         </div>
