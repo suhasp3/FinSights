@@ -29,6 +29,7 @@ func main() {
         os.Exit(1)
     } else {
         fmt.Println("✅ Using OpenAI API key from environment")
+        fmt.Printf("🔑 API Key length: %d characters\n", len(openAIKey))
     }
 
     r := gin.Default()
@@ -54,6 +55,15 @@ func main() {
 
     // pass apiKey down to routes
     fmt.Printf("🔧 Registering API routes...\n")
+    
+    // Add error handling for route registration
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Printf("❌ Panic during route registration: %v\n", r)
+            os.Exit(1)
+        }
+    }()
+    
     routes.RegisterRoutes(r, apiKey, openAIKey)
     fmt.Printf("✅ API routes registered successfully\n")
 
