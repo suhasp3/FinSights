@@ -2,9 +2,6 @@
 
 A financial dashboard with AI insights and budget tracking for college students.
 <img width="735" height="384" alt="Screenshot 2025-09-28 at 5 52 13 AM" src="https://github.com/user-attachments/assets/80abb490-3b52-4cbf-a7f2-cbd710b72562" />
-<img width="737" height="384" alt="Screenshot 2025-09-28 at 5 52 28 AM" src="https://github.com/user-attachments/assets/3bd85063-5fcf-4efc-a1ed-a4e8c88b11df" />
-<img width="734" height="335" alt="Screenshot 2025-09-28 at 5 52 48 AM" src="https://github.com/user-attachments/assets/58eb531c-cea4-4327-9e76-cc5fa44e2e7f" />
-
 
 ## Quick Start
 
