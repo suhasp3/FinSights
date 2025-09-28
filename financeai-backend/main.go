@@ -32,6 +32,9 @@ func main() {
         fmt.Printf("🔑 API Key length: %d characters\n", len(openAIKey))
     }
 
+    // Set Gin to release mode for production
+    gin.SetMode(gin.ReleaseMode)
+    
     r := gin.Default()
 
     // Add simple health check endpoint
@@ -96,6 +99,11 @@ func main() {
             "timestamp": time.Now().Format(time.RFC3339),
         })
     })
+    
+    // Test that all routes are registered
+    fmt.Printf("🔍 Testing route registration...\n")
+    routes := r.Routes()
+    fmt.Printf("✅ Total routes registered: %d\n", len(routes))
     
     fmt.Printf("✅ Server starting on port %s...\n", port)
     
