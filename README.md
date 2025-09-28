@@ -10,6 +10,26 @@ A financial dashboard with AI insights and budget tracking for college students.
 - Go (v1.21+)
 - Git
 
+**Installing Go (if not installed):**
+
+**macOS:**
+
+```bash
+brew install go
+```
+
+**Windows:**
+Download from https://golang.org/dl/ and run the installer
+
+**Linux:**
+
+```bash
+sudo apt update
+sudo apt install golang-go
+```
+
+Verify installation: `go version`
+
 ### 1. Clone and Setup
 
 ```bash
