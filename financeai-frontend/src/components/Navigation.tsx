@@ -1,5 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { TrendingUp, MessageCircle, BarChart3, Target, LogOut } from "lucide-react";
+import {
+  TrendingUp,
+  MessageCircle,
+  BarChart3,
+  Target,
+  LogOut,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -22,9 +28,9 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <img 
-              src="/finsightslogo.png" 
-              alt="FinSights Logo" 
+            <img
+              src="/finsightslogo.png"
+              alt="FinSights Logo"
               className="h-8 w-8 rounded-md"
             />
             <span className="text-xl font-bold text-primary">FinSights</span>
@@ -32,6 +38,18 @@ const Navigation = () => {
 
           {/* Navigation Links */}
           <div className="flex items-center space-x-1">
+            <Link
+              to="/home"
+              className={cn(
+                "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                isActive("/home")
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+            >
+              <TrendingUp className="h-4 w-4" />
+              <span>Home</span>
+            </Link>
             <Link
               to="/"
               className={cn(

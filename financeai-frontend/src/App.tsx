@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Insights from "./pages/Insights";
 import Budget from "./pages/Budget";
@@ -67,6 +68,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/home" element={<Home />} />
             <Route
               path="/login"
               element={
@@ -75,13 +77,7 @@ const App = () => {
             />
             <Route
               path="/"
-              element={
-                isAuthenticated ? (
-                  <Dashboard />
-                ) : (
-                  <Navigate to="/login" replace />
-                )
-              }
+              element={isAuthenticated ? <Dashboard /> : <Home />}
             />
             <Route
               path="/insights"
@@ -96,11 +92,7 @@ const App = () => {
             <Route
               path="/budget"
               element={
-                isAuthenticated ? (
-                  <Budget />
-                ) : (
-                  <Navigate to="/login" replace />
-                )
+                isAuthenticated ? <Budget /> : <Navigate to="/login" replace />
               }
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
