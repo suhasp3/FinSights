@@ -10,7 +10,7 @@ type OpenAIService struct {
 	APIKey string
 }
 
-func NewOpenAIService(apiKey string) *OpenAIService {
+func NewOpenAIService(apiKey string) *OpenAIService  { 
 	return &OpenAIService{
 		APIKey: apiKey,
 	}

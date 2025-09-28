@@ -27,3 +27,4 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 For custom domains, check your deployment platform's documentation (Vercel, Railway, etc.)
+# Trigger redeploy

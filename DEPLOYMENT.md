@@ -53,7 +53,7 @@ VITE_API_URL=https://your-backend-url.com/api
 
 ```
 OPEN_AI_KEY=sk-proj-your-openai-key-here
-NESSIE_KEY=your-nessie-key-here
+
 ```
 
 ### Deployment Steps
