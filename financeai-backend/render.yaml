@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: finsights-backend
+    env: go
+    buildCommand: go build -o main .
+    startCommand: ./main
+    envVars:
+      - key: OPEN_AI_KEY
+        sync: false
+      - key: NESSIE_KEY
+        sync: false
